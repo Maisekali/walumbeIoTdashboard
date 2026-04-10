@@ -2,130 +2,566 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinical Telemetry - Station 3336647</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>⚕️ Neural Telemetry | ICU Station 3336647</title>
+    <!-- Bootstrap 5 + Icons + Fonts -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron&family=Roboto:wght@300;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,500;14..32,700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #0d1117; color: #c9d1d9; font-family: 'Roboto', sans-serif; }
-        .vital-card { background: #161b22; border-radius: 20px; border-left: 6px solid #58a6ff; transition: 0.4s ease; }
-        .critical-mode { border-left-color: #f85149 !important; background: #2a1215 !important; animation: pulse 2s infinite; }
-        .vital-label { color: #8b949e; text-transform: uppercase; letter-spacing: 1px; font-weight: 500; }
-        .vital-value { font-family: 'Orbitron', sans-serif; font-size: 4rem; color: #58a6ff; }
-        .critical-text { color: #f85149 !important; }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(248, 81, 73, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(248, 81, 73, 0); } 100% { box-shadow: 0 0 0 0 rgba(248, 81, 73, 0); } }
-        .header-bar { border-bottom: 1px solid #30363d; padding: 20px 0; background: #010409; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: radial-gradient(circle at 10% 20%, #03060c, #000000);
+            font-family: 'Inter', sans-serif;
+            color: #eef5ff;
+            padding-bottom: 2rem;
+        }
+
+        /* glassmorphic header */
+        .neon-header {
+            background: rgba(5, 15, 25, 0.75);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0, 255, 255, 0.25);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        }
+
+        .station-badge {
+            background: linear-gradient(135deg, #0a2f44, #05161f);
+            padding: 0.5rem 1.2rem;
+            border-radius: 40px;
+            border-left: 3px solid #0ff;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 1px;
+        }
+
+        .vital-card {
+            background: rgba(18, 25, 45, 0.75);
+            backdrop-filter: blur(4px);
+            border-radius: 2rem;
+            border: 1px solid rgba(88, 166, 255, 0.25);
+            transition: all 0.25s ease;
+            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.5);
+        }
+
+        .vital-card:hover {
+            border-color: #58a6ff;
+            transform: translateY(-3px);
+            box-shadow: 0 25px 40px -14px rgba(0,160,255,0.2);
+        }
+
+        .critical-mode {
+            border-left: 6px solid #f85149 !important;
+            background: rgba(40, 20, 30, 0.9) !important;
+            box-shadow: 0 0 18px rgba(248, 81, 73, 0.3);
+            animation: pulseRed 1.4s infinite;
+        }
+
+        @keyframes pulseRed {
+            0% { border-left-color: #f85149; box-shadow: 0 0 0 0 rgba(248,81,73,0.3);}
+            100% { border-left-color: #ff7b72; box-shadow: 0 0 0 8px rgba(248,81,73,0);}
+        }
+
+        .vital-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 3.8rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #c0e0ff, #58a6ff);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 8px rgba(88,166,255,0.3);
+        }
+
+        .critical-text {
+            background: linear-gradient(135deg, #ff8a7a, #f85149) !important;
+            background-clip: text !important;
+            -webkit-background-clip: text !important;
+            color: transparent !important;
+            text-shadow: 0 0 6px rgba(248,81,73,0.5);
+        }
+
+        .vital-label {
+            font-size: 0.85rem;
+            letter-spacing: 1.5px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #8da2d5;
+        }
+
+        .emergency-badge {
+            background: rgba(248, 81, 73, 0.2);
+            border-radius: 30px;
+            padding: 6px 14px;
+            font-weight: 600;
+            backdrop-filter: blur(4px);
+        }
+
+        .blink-red {
+            animation: blinkWarning 1s step-end infinite;
+        }
+
+        @keyframes blinkWarning {
+            0%, 100% { opacity: 1; background-color: #f85149; box-shadow: 0 0 6px red; }
+            50% { opacity: 0.5; background-color: #b91c1c; }
+        }
+
+        .chart-glass {
+            background: rgba(10, 20, 30, 0.65);
+            backdrop-filter: blur(4px);
+            border-radius: 1.6rem;
+            border: 1px solid rgba(88,166,255,0.3);
+            overflow: hidden;
+        }
+
+        .recent-table {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 1.2rem;
+            font-size: 0.85rem;
+        }
+
+        .recent-table th {
+            color: #79b8ff;
+            font-weight: 500;
+            border-bottom: 1px solid #2d3a4e;
+        }
+
+        .recent-table td {
+            color: #c9e2ff;
+            font-family: monospace;
+        }
+
+        .status-led {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #2ea043;
+            box-shadow: 0 0 5px #2ea043;
+            margin-right: 8px;
+        }
+
+        .offline-led {
+            background-color: #f85149;
+            box-shadow: 0 0 4px #f85149;
+        }
+
+        .btn-outline-cyan {
+            border-color: #2b9aff;
+            color: #9acdff;
+        }
+        .btn-outline-cyan:hover {
+            background: #2b9aff20;
+            color: white;
+            border-color: #58a6ff;
+        }
+
+        footer {
+            border-top: 1px solid #1e2a3a;
+            font-size: 0.7rem;
+        }
+        
+        @media (max-width: 768px) {
+            .vital-value { font-size: 2.5rem; }
+        }
     </style>
 </head>
 <body>
 
-<div class="header-bar mb-5">
-    <div class="container d-flex justify-content-between align-items-center">
-        <h4 class="m-0">PATIENT MONITOR <small class="text-muted ms-2">CH: 3336647</small></h4>
-        <button onclick="requestNotify()" class="btn btn-outline-primary btn-sm">Enable Browser Alerts</button>
+<div class="neon-header sticky-top mb-4">
+    <div class="container py-3 d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <div class="d-flex align-items-center gap-3">
+            <i class="bi bi-heart-pulse-fill text-danger fs-3"></i>
+            <div>
+                <h3 class="m-0 fw-semibold" style="letter-spacing: -0.5px;">NEURAL TELEMETRY</h3>
+                <div class="station-badge mt-1">
+                    <i class="bi bi-hdd-stack-fill me-1"></i> STATION · CH <span id="channelIdDisplay">3336647</span>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex gap-2">
+            <button id="notifyBtn" onclick="requestNotificationPerm()" class="btn btn-outline-cyan btn-sm rounded-pill px-3">
+                <i class="bi bi-bell-fill me-1"></i> Enable Alerts
+            </button>
+            <button onclick="manualRefresh()" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                <i class="bi bi-arrow-repeat"></i> Sync
+            </button>
+        </div>
     </div>
 </div>
 
 <div class="container">
-    <div class="row g-4">
-        <div class="col-md-6">
-            <div id="temp-card" class="vital-card p-4 shadow-sm">
-                <p class="vital-label mb-0">Body Temperature</p>
-                <div class="d-flex align-items-baseline">
+    <!-- First row: 3 vital pillars (Temp, HR, Alert Status) -->
+    <div class="row g-4 mb-4">
+        <!-- Temperature Card -->
+        <div class="col-md-4">
+            <div id="temp-card" class="vital-card p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center">
+                    <p class="vital-label mb-0"><i class="bi bi-thermometer-half me-1"></i> CORE TEMPERATURE</p>
+                    <i class="bi bi-droplet-half fs-5" style="color:#58a6ff;"></i>
+                </div>
+                <div class="d-flex align-items-baseline mt-2">
                     <span id="temp-display" class="vital-value">--.-</span>
-                    <span class="ms-2 h3 text-muted">°C</span>
+                    <span class="ms-2 fs-4 fw-light text-muted">°C</span>
                 </div>
-                <div id="temp-status" class="small mt-2">Connecting...</div>
+                <div id="temp-status" class="small mt-3 d-flex align-items-center">
+                    <span class="status-led" id="tempLed"></span>
+                    <span>awaiting data</span>
+                </div>
+                <div class="progress mt-2" style="height: 3px; background: #1f2a3e;">
+                    <div id="tempGauge" class="progress-bar bg-info" style="width: 0%"></div>
+                </div>
+                <div class="text-end mt-1"><small class="text-secondary">threshold: >38.0°C or <35.0°C</small></div>
             </div>
         </div>
 
-        <div class="col-md-6">
-            <div id="bpm-card" class="vital-card p-4 shadow-sm">
-                <p class="vital-label mb-0">Heart Rate (Pulse)</p>
-                <div class="d-flex align-items-baseline">
+        <!-- Heart Rate Card -->
+        <div class="col-md-4">
+            <div id="bpm-card" class="vital-card p-4 h-100">
+                <div class="d-flex justify-content-between">
+                    <p class="vital-label mb-0"><i class="bi bi-heart-fill me-1 text-danger"></i> HEART RATE (PULSE)</p>
+                    <i class="bi bi-activity fs-5 text-danger"></i>
+                </div>
+                <div class="d-flex align-items-baseline mt-2">
                     <span id="bpm-display" class="vital-value">--</span>
-                    <span class="ms-2 h3 text-muted">BPM</span>
+                    <span class="ms-2 fs-4 fw-light text-muted">BPM</span>
                 </div>
-                <div id="bpm-status" class="small mt-2">Connecting...</div>
+                <div id="bpm-status" class="small mt-3">
+                    <span class="status-led" id="bpmLed"></span>
+                    <span>awaiting data</span>
+                </div>
+                <div class="progress mt-2" style="height: 3px; background: #1f2a3e;">
+                    <div id="bpmGauge" class="progress-bar bg-danger" style="width: 0%"></div>
+                </div>
+                <div class="text-end mt-1"><small class="text-secondary">abnormal: >100 or <60 BPM</small></div>
+            </div>
+        </div>
+
+        <!-- Emergency / Alert Trigger Card -->
+        <div class="col-md-4">
+            <div id="alert-card" class="vital-card p-4 h-100" style="border-left-color: #f0883e;">
+                <p class="vital-label mb-0"><i class="bi bi-exclamation-triangle-fill me-1"></i> CLINICAL ALERT ENGINE</p>
+                <div class="mt-3 d-flex align-items-center gap-3 flex-wrap">
+                    <div id="alertBadge" class="emergency-badge px-3 py-2">
+                        <i class="bi bi-shield-check"></i> <span id="alertText">STABLE</span>
+                    </div>
+                    <div id="criticalFlagIcon">
+                        <i class="bi bi-heart-half fs-2 text-secondary"></i>
+                    </div>
+                </div>
+                <div id="alertDetails" class="mt-3 small text-info">No active critical event</div>
+                <div class="mt-2"><i class="bi bi-bell-slash"></i> <span id="lastUpdateTime">last sync: --:--:--</span></div>
             </div>
         </div>
     </div>
 
-    <div class="row mt-5">
-        <div class="col-12">
-            <div class="vital-card p-3">
-                <h6 class="vital-label mb-3">Cloud Telemetry History</h6>
-                <div class="ratio ratio-21x9">
-                    <iframe id="chart-frame" src="https://thingspeak.com/channels/3336647/charts/1?bgcolor=%23161b22&color=%2358a6ff&dynamic=true&title=Live+Data"></iframe>
+    <!-- Dual History Charts Row (ThingSpeak iframes) -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <div class="chart-glass p-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="vital-label mb-0"><i class="bi bi-graph-up"></i> TEMPERATURE TREND (24h)</h6>
+                    <i class="bi bi-thermometer-sun text-info"></i>
+                </div>
+                <div class="ratio ratio-16x9">
+                    <iframe id="tempChartFrame" src="https://thingspeak.com/channels/3336647/charts/1?bgcolor=%230a101f&color=%2358a6ff&dynamic=true&title=Temp&type=line" style="border-radius: 1rem;" loading="lazy"></iframe>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="chart-glass p-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="vital-label mb-0"><i class="bi bi-heart-pulse"></i> HEART RATE TREND (24h)</h6>
+                    <i class="bi bi-activity text-danger"></i>
+                </div>
+                <div class="ratio ratio-16x9">
+                    <iframe id="bpmChartFrame" src="https://thingspeak.com/channels/3336647/charts/2?bgcolor=%230a101f&color=%23f97373&dynamic=true&title=Heart%20Rate&type=line" style="border-radius: 1rem;" loading="lazy"></iframe>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Recent Telemetry Logs + API key info (clean) -->
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="vital-card p-4">
+                <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0"><i class="bi bi-clock-history"></i> LIVE FEED LOG (last 5 entries)</h5>
+                    <span class="badge bg-dark"><i class="bi bi-key-fill"></i> API KEY · O76VVCKZVRJN3A33 (active)</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table recent-table table-borderless align-middle">
+                        <thead>
+                            <tr><th>Timestamp</th><th>🌡️ Temp (°C)</th><th>💓 HR (BPM)</th><th>🚨 Alert flag</th></tr>
+                        </thead>
+                        <tbody id="recentTableBody">
+                            <tr><td colspan="4" class="text-center text-muted">loading telemetry stream...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="text-end mt-2">
+                    <span class="text-secondary small"><i class="bi bi-wifi"></i> <span id="connStatus">connected</span></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer class="text-center mt-5 text-secondary small">
+        <i class="bi bi-shield-lock"></i> HIPAA-style simulated dashboard · real-time ThingSpeak sync (15s) · channel 3336647
+    </footer>
 </div>
 
 <script>
+    // ========= CONSTANTS ==========
     const CHANNEL_ID = '3336647';
-    const READ_KEY = 'O76VVCKZVRJN3A33'; // Using provided key
+    const READ_API_KEY = 'O76VVCKZVRJN3A33';   // Provided API key - DO NOT REMOVE
+    let lastAlertTrigger = 0;
+    let notificationPermissionGranted = false;
 
-    function requestNotify() {
-        Notification.requestPermission();
+    // DOM elements
+    const tempCard = document.getElementById('temp-card');
+    const bpmCard = document.getElementById('bpm-card');
+    const tempDisplay = document.getElementById('temp-display');
+    const bpmDisplay = document.getElementById('bpm-display');
+    const tempStatusSpan = document.getElementById('temp-status');
+    const bpmStatusSpan = document.getElementById('bpm-status');
+    const alertTextSpan = document.getElementById('alertText');
+    const alertDetailsSpan = document.getElementById('alertDetails');
+    const criticalFlagIcon = document.getElementById('criticalFlagIcon');
+    const alertBadgeDiv = document.getElementById('alertBadge');
+    const lastUpdateSpan = document.getElementById('lastUpdateTime');
+    const connStatusSpan = document.getElementById('connStatus');
+    const tempLed = document.getElementById('tempLed');
+    const bpmLed = document.getElementById('bpmLed');
+    const tempGauge = document.getElementById('tempGauge');
+    const bpmGauge = document.getElementById('bpmGauge');
+
+    // Helper: update gauge visual
+    function updateTempGauge(tempVal) {
+        if (isNaN(tempVal)) { tempGauge.style.width = '0%'; return; }
+        let percent = ((tempVal - 30) / 20) * 100;
+        percent = Math.min(100, Math.max(0, percent));
+        tempGauge.style.width = `${percent}%`;
+        if (tempVal > 38 || tempVal < 35) tempGauge.classList.add('bg-danger');
+        else tempGauge.classList.remove('bg-danger');
     }
 
+    function updateBpmGauge(bpm) {
+        if (isNaN(bpm)) { bpmGauge.style.width = '0%'; return; }
+        let percent = (bpm / 160) * 100;
+        percent = Math.min(100, Math.max(0, percent));
+        bpmGauge.style.width = `${percent}%`;
+    }
+
+    // Critical condition detection (clinical thresholds)
+    function isTempCritical(temp) {
+        return (temp > 38.0 || temp < 35.0);
+    }
+
+    function isBpmCritical(bpm) {
+        return (bpm > 100 || bpm < 60);
+    }
+
+    // Update main UI from single feed
     async function updateDashboard() {
-        const url = `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds/last.json?api_key=${READ_KEY}`;
-        
+        const url = `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds/last.json?api_key=${READ_API_KEY}`;
         try {
+            connStatusSpan.innerHTML = '<i class="bi bi-cloud-check"></i> sync';
+            connStatusSpan.classList.remove('text-danger');
             const response = await fetch(url);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
             const data = await response.json();
-            
+            if (!data || data.field1 === undefined) throw new Error('no data');
+
             const temp = parseFloat(data.field1);
             const bpm = parseInt(data.field2);
-            const alertTrigger = parseInt(data.field3);
+            const alertTrigger = parseInt(data.field3) || 0;
+            const createdAt = data.created_at ? new Date(data.created_at).toLocaleTimeString() : 'just now';
 
-            // Update Temperature UI
-            const tempCard = document.getElementById('temp-card');
-            const tempDisp = document.getElementById('temp-display');
-            tempDisp.innerText = temp.toFixed(1);
-            if(temp > 30.0) {
-                tempCard.classList.add('critical-mode');
-                tempDisp.classList.add('critical-text');
-                document.getElementById('temp-status').innerHTML = "<b>THRESHOLD BREACHED</b>";
+            // Update last timestamp
+            lastUpdateSpan.innerHTML = `<i class="bi bi-stopwatch"></i> ${new Date().toLocaleTimeString()} (feed: ${createdAt})`;
+
+            // ---- Temperature logic ----
+            if (!isNaN(temp)) {
+                tempDisplay.innerText = temp.toFixed(1);
+                updateTempGauge(temp);
+                const tempCritical = isTempCritical(temp);
+                if (tempCritical) {
+                    tempCard.classList.add('critical-mode');
+                    tempDisplay.classList.add('critical-text');
+                    tempStatusSpan.innerHTML = `<span class="status-led blink-red" style="background:#f85149;"></span> <b class="text-danger">CRITICAL RANGE (hyper/hypothermia)</b>`;
+                    tempLed.style.backgroundColor = "#f85149";
+                    tempLed.classList.add('blink-red');
+                } else {
+                    tempCard.classList.remove('critical-mode');
+                    tempDisplay.classList.remove('critical-text');
+                    tempStatusSpan.innerHTML = `<span class="status-led" style="background:#2ea043;"></span> Normal range`;
+                    tempLed.style.backgroundColor = "#2ea043";
+                    tempLed.classList.remove('blink-red');
+                }
             } else {
-                tempCard.classList.remove('critical-mode');
-                tempDisp.classList.remove('critical-text');
-                document.getElementById('temp-status').innerText = "Normal Range";
+                tempDisplay.innerText = 'ERR';
+                tempStatusSpan.innerHTML = `<span class="status-led offline-led"></span> invalid data`;
             }
 
-            // Update Heart Rate UI
-            const bpmCard = document.getElementById('bpm-card');
-            const bpmDisp = document.getElementById('bpm-display');
-            bpmDisp.innerText = bpm;
-            if(bpm > 100 || bpm < 60) {
-                bpmCard.classList.add('critical-mode');
-                bpmDisp.classList.add('critical-text');
-                document.getElementById('bpm-status').innerHTML = "<b>ABNORMAL RHYTHM</b>";
+            // ---- Heart Rate logic ----
+            if (!isNaN(bpm)) {
+                bpmDisplay.innerText = bpm;
+                updateBpmGauge(bpm);
+                const bpmCritical = isBpmCritical(bpm);
+                if (bpmCritical) {
+                    bpmCard.classList.add('critical-mode');
+                    bpmDisplay.classList.add('critical-text');
+                    bpmStatusSpan.innerHTML = `<span class="status-led blink-red" style="background:#f85149;"></span> <b class="text-danger">ARRHYTHMIA / BRADY-TACHY</b>`;
+                    bpmLed.style.backgroundColor = "#f85149";
+                    bpmLed.classList.add('blink-red');
+                } else {
+                    bpmCard.classList.remove('critical-mode');
+                    bpmDisplay.classList.remove('critical-text');
+                    bpmStatusSpan.innerHTML = `<span class="status-led" style="background:#2ea043;"></span> Sinus rhythm`;
+                    bpmLed.style.backgroundColor = "#2ea043";
+                    bpmLed.classList.remove('blink-red');
+                }
             } else {
-                bpmCard.classList.remove('critical-mode');
-                bpmDisp.classList.remove('critical-text');
-                document.getElementById('bpm-status').innerText = "Normal Rhythm";
+                bpmDisplay.innerText = '--';
+                bpmStatusSpan.innerHTML = `<span class="status-led offline-led"></span> no signal`;
             }
 
-            // Trigger Browser Notification
-            if (alertTrigger === 1 && Notification.permission === "granted") {
-                new Notification("PATIENT EMERGENCY", {
-                    body: `Abnormal readings detected: ${temp}°C / ${bpm} BPM`,
-                    icon: "https://cdn-icons-png.flaticon.com/512/4228/4228704.png"
-                });
+            // ---- ALERT TRIGGER logic (field3) ----
+            let globalEmergency = false;
+            if (alertTrigger === 1) {
+                globalEmergency = true;
+                alertTextSpan.innerHTML = '<i class="bi bi-exclamation-octagon-fill"></i> CODE RED · EMERGENCY';
+                alertBadgeDiv.style.background = "rgba(248,81,73,0.4)";
+                alertBadgeDiv.style.border = "1px solid #f85149";
+                alertDetailsSpan.innerHTML = `<i class="bi bi-broadcast"></i> Device emergency flag ACTIVE (field3=1) — immediate intervention required.`;
+                criticalFlagIcon.innerHTML = '<i class="bi bi-bell-ring-fill text-danger fs-1 blink-red"></i>';
+                // trigger notification if permission granted
+                if (notificationPermissionGranted && lastAlertTrigger !== 1) {
+                    new Notification("🚨 CRITICAL PATIENT ALERT", {
+                        body: `Station ${CHANNEL_ID} | Temp: ${temp.toFixed(1)}°C | HR: ${bpm} BPM | Emergency flag = 1`,
+                        icon: "https://cdn-icons-png.flaticon.com/512/4228/4228704.png",
+                        silent: false
+                    });
+                }
+            } else {
+                // if no emergency, check combined clinical thresholds for visual notification
+                const anyCritical = (!isNaN(temp) && isTempCritical(temp)) || (!isNaN(bpm) && isBpmCritical(bpm));
+                if (anyCritical) {
+                    alertTextSpan.innerHTML = '<i class="bi bi-heart-arrow"></i> CLINICAL WARNING';
+                    alertBadgeDiv.style.background = "rgba(255,165,0,0.3)";
+                    alertBadgeDiv.style.border = "1px solid #ffa500";
+                    alertDetailsSpan.innerHTML = `⚠️ Abnormal vital signs detected (Temp out of range or HR abnormal). Monitor closely.`;
+                    criticalFlagIcon.innerHTML = '<i class="bi bi-exclamation-diamond-fill text-warning fs-1"></i>';
+                } else {
+                    alertTextSpan.innerHTML = '<i class="bi bi-check-circle-fill"></i> STABLE';
+                    alertBadgeDiv.style.background = "rgba(46,160,67,0.2)";
+                    alertBadgeDiv.style.border = "1px solid #2ea043";
+                    alertDetailsSpan.innerHTML = `✅ All parameters within safe thresholds. No active alarm.`;
+                    criticalFlagIcon.innerHTML = '<i class="bi bi-heart-half text-secondary fs-1"></i>';
+                }
+                // also if alertTrigger was 1 and now back to 0, reset last flag
+            }
+            lastAlertTrigger = alertTrigger;
+
+            // Additional: send notification if clinical condition critical and emergency flag not set, but we already do based on threshold
+            if (notificationPermissionGranted && alertTrigger !== 1) {
+                const criticalTempNow = !isNaN(temp) && isTempCritical(temp);
+                const criticalBpmNow = !isNaN(bpm) && isBpmCritical(bpm);
+                if ((criticalTempNow || criticalBpmNow) && lastAlertTrigger !== -999) {
+                    new Notification("⚠️ Vital signs abnormal", {
+                        body: `Patient: ${temp.toFixed(1)}°C , ${bpm} BPM - requires attention.`,
+                        icon: "https://cdn-icons-png.flaticon.com/512/4228/4228704.png"
+                    });
+                }
             }
 
         } catch (error) {
-            console.error("Dashboard Sync Error");
+            console.warn("Dashboard sync error", error);
+            connStatusSpan.innerHTML = '<i class="bi bi-wifi-off"></i> offline';
+            connStatusSpan.classList.add('text-danger');
+            lastUpdateSpan.innerHTML = `last sync: error @ ${new Date().toLocaleTimeString()}`;
         }
     }
 
-    // Update interval: 15 seconds (ThingSpeak limitation for free tier)
-    setInterval(updateDashboard, 15000);
-    updateDashboard(); // Initial Load
+    // Fetch last 5 readings for table
+    async function fetchRecentLogs() {
+        const url = `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds.json?api_key=${READ_API_KEY}&results=5`;
+        try {
+            const response = await fetch(url);
+            const json = await response.json();
+            const feeds = json.feeds;
+            const tbody = document.getElementById('recentTableBody');
+            if (!feeds || feeds.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-muted">No recent telemetry</td></tr>';
+                return;
+            }
+            let rows = '';
+            feeds.reverse().forEach(feed => {
+                let rawTime = feed.created_at ? new Date(feed.created_at).toLocaleString() : 'unknown';
+                let tempVal = feed.field1 ? parseFloat(feed.field1).toFixed(1) : '—';
+                let hrVal = feed.field2 ? feed.field2 : '—';
+                let alertFlag = feed.field3 === '1' ? '<span class="badge bg-danger"><i class="bi bi-alarm"></i> ACTIVE</span>' : '<span class="badge bg-secondary">normal</span>';
+                rows += `<tr>
+                            <td class="small">${rawTime}</td>
+                            <td class="fw-bold">${tempVal !== '—' ? tempVal + '°C' : '∅'}</td>
+                            <td>${hrVal !== '—' ? hrVal + ' bpm' : '∅'}</td>
+                            <td>${alertFlag}</td>
+                         </tr>`;
+            });
+            tbody.innerHTML = rows;
+        } catch (err) {
+            console.error("recent logs error", err);
+            document.getElementById('recentTableBody').innerHTML = '<tr><td colspan="4" class="text-danger">Failed to load history</td></tr>';
+        }
+    }
+
+    // manual refresh trigger
+    function manualRefresh() {
+        updateDashboard();
+        fetchRecentLogs();
+        const toastMsg = document.createElement('div');
+        toastMsg.innerText = '↻ Manual sync triggered';
+        toastMsg.style.position = 'fixed'; toastMsg.style.bottom = '20px'; toastMsg.style.right = '20px';
+        toastMsg.style.background = '#0a2540'; toastMsg.style.padding = '8px 16px'; toastMsg.style.borderRadius = '30px';
+        toastMsg.style.fontSize = '12px'; toastMsg.style.zIndex = 9999; toastMsg.style.border = '1px solid #58a6ff';
+        document.body.appendChild(toastMsg);
+        setTimeout(() => toastMsg.remove(), 2000);
+    }
+
+    // Request browser notifications
+    function requestNotificationPerm() {
+        if (Notification.permission === "granted") {
+            notificationPermissionGranted = true;
+            new Notification("🔔 Telemetry Alerts Active", { body: "You will receive critical alerts for channel 3336647." });
+        } else if (Notification.permission !== "denied") {
+            Notification.requestPermission().then(perm => {
+                if (perm === "granted") {
+                    notificationPermissionGranted = true;
+                    new Notification("✅ Clinical alerts enabled", { body: "Emergency notifications will appear in real-time." });
+                }
+            });
+        } else {
+            alert("Notifications blocked. Please allow in browser settings.");
+        }
+    }
+
+    // Initial load + intervals
+    async function init() {
+        await updateDashboard();
+        await fetchRecentLogs();
+        setInterval(updateDashboard, 15000);    // ThingSpeak free tier optimal
+        setInterval(fetchRecentLogs, 30000);    // refresh log table every 30s
+        // Check notification permission on load
+        if (Notification.permission === "granted") notificationPermissionGranted = true;
+        // Show channel id in UI
+        document.getElementById('channelIdDisplay').innerText = CHANNEL_ID;
+    }
+
+    init();
 </script>
 </body>
 </html>
