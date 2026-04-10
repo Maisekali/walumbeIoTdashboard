@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinical Telemetry - Station 3336647</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron&family=Roboto:wght@300;500&display=swap" rel="stylesheet">
+    <style>
+        body { background-color: #0d1117; color: #c9d1d9; font-family: 'Roboto', sans-serif; }
+        .vital-card { background: #161b22; border-radius: 20px; border-left: 6px solid #58a6ff; transition: 0.4s ease; }
+        .critical-mode { border-left-color: #f85149 !important; background: #2a1215 !important; animation: pulse 2s infinite; }
+        .vital-label { color: #8b949e; text-transform: uppercase; letter-spacing: 1px; font-weight: 500; }
+        .vital-value { font-family: 'Orbitron', sans-serif; font-size: 4rem; color: #58a6ff; }
+        .critical-text { color: #f85149 !important; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(248, 81, 73, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(248, 81, 73, 0); } 100% { box-shadow: 0 0 0 0 rgba(248, 81, 73, 0); } }
+        .header-bar { border-bottom: 1px solid #30363d; padding: 20px 0; background: #010409; }
+    </style>
+</head>
+<body>
+
+<div class="header-bar mb-5">
+    <div class="container d-flex justify-content-between align-items-center">
+        <h4 class="m-0">PATIENT MONITOR <small class="text-muted ms-2">CH: 3336647</small></h4>
+        <button onclick="requestNotify()" class="btn btn-outline-primary btn-sm">Enable Browser Alerts</button>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div id="temp-card" class="vital-card p-4 shadow-sm">
+                <p class="vital-label mb-0">Body Temperature</p>
+                <div class="d-flex align-items-baseline">
+                    <span id="temp-display" class="vital-value">--.-</span>
+                    <span class="ms-2 h3 text-muted">°C</span>
+                </div>
+                <div id="temp-status" class="small mt-2">Connecting...</div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div id="bpm-card" class="vital-card p-4 shadow-sm">
+                <p class="vital-label mb-0">Heart Rate (Pulse)</p>
+                <div class="d-flex align-items-baseline">
+                    <span id="bpm-display" class="vital-value">--</span>
+                    <span class="ms-2 h3 text-muted">BPM</span>
+                </div>
+                <div id="bpm-status" class="small mt-2">Connecting...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="vital-card p-3">
+                <h6 class="vital-label mb-3">Cloud Telemetry History</h6>
+                <div class="ratio ratio-21x9">
+                    <iframe id="chart-frame" src="https://thingspeak.com/channels/3336647/charts/1?bgcolor=%23161b22&color=%2358a6ff&dynamic=true&title=Live+Data"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const CHANNEL_ID = '3336647';
+    const READ_KEY = 'O76VVCKZVRJN3A33'; // Using provided key
+
+    function requestNotify() {
+        Notification.requestPermission();
+    }
+
+    async function updateDashboard() {
+        const url = `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds/last.json?api_key=${READ_KEY}`;
+        
+        try {
+            const response = await fetch(url);
+            const data = await response.json();
+            
+            const temp = parseFloat(data.field1);
+            const bpm = parseInt(data.field2);
+            const alertTrigger = parseInt(data.field3);
+
+            // Update Temperature UI
+            const tempCard = document.getElementById('temp-card');
+            const tempDisp = document.getElementById('temp-display');
+            tempDisp.innerText = temp.toFixed(1);
+            if(temp > 30.0) {
+                tempCard.classList.add('critical-mode');
+                tempDisp.classList.add('critical-text');
+                document.getElementById('temp-status').innerHTML = "<b>THRESHOLD BREACHED</b>";
+            } else {
+                tempCard.classList.remove('critical-mode');
+                tempDisp.classList.remove('critical-text');
+                document.getElementById('temp-status').innerText = "Normal Range";
+            }
+
+            // Update Heart Rate UI
+            const bpmCard = document.getElementById('bpm-card');
+            const bpmDisp = document.getElementById('bpm-display');
+            bpmDisp.innerText = bpm;
+            if(bpm > 100 || bpm < 60) {
+                bpmCard.classList.add('critical-mode');
+                bpmDisp.classList.add('critical-text');
+                document.getElementById('bpm-status').innerHTML = "<b>ABNORMAL RHYTHM</b>";
+            } else {
+                bpmCard.classList.remove('critical-mode');
+                bpmDisp.classList.remove('critical-text');
+                document.getElementById('bpm-status').innerText = "Normal Rhythm";
+            }
+
+            // Trigger Browser Notification
+            if (alertTrigger === 1 && Notification.permission === "granted") {
+                new Notification("PATIENT EMERGENCY", {
+                    body: `Abnormal readings detected: ${temp}°C / ${bpm} BPM`,
+                    icon: "https://cdn-icons-png.flaticon.com/512/4228/4228704.png"
+                });
+            }
+
+        } catch (error) {
+            console.error("Dashboard Sync Error");
+        }
+    }
+
+    // Update interval: 15 seconds (ThingSpeak limitation for free tier)
+    setInterval(updateDashboard, 15000);
+    updateDashboard(); // Initial Load
+</script>
+</body>
+</html>
